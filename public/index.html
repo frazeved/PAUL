@@ -282,7 +282,7 @@
           <div class="field-input">
             <select id="f-created-by" data-col="CREATED BY">
               <option value="">--</option>
-              <option>IGO GARDEL</option>
+              <option selected>IGO GARDEL</option>
               <option>Kamilla Aguiar</option>
               <option>Paula Erthal</option>
               <option>Ozan Guruscu</option>
@@ -446,7 +446,8 @@ async function saveSample() {
     const action = data.action === 'updated' ? 'updated' : 'created';
     setMsg(`Record ${action} successfully`, 'ok');
     showToast(`Saved — record ${action}`);
-    loadDatabase(); // refresh table
+    clearForm();
+    loadDatabase();
   } catch (e) {
     setMsg(e.message, 'err');
   } finally {

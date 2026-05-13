@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>305 Workspace — Samples Tracking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f6fa; --surface: #fff; --border: #e4e7ed;
+      --text: #1a1d23; --text-2: #6b7280; --text-3: #9ca3af;
+      --accent: #0891b2; --accent-light: #ecfeff; --accent-hover: #0e7490;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 50; }
+    .nav-brand { font-size: 15px; font-weight: 700; color: var(--text); }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .nav-link { font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 6px; text-decoration: none; color: var(--text-2); transition: background 0.15s, color 0.15s; white-space: nowrap; }
+    .nav-link:hover { background: var(--bg); color: var(--text); }
+    .nav-link.active { background: var(--accent-light); color: var(--accent); }
+    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; padding: 6px 8px; color: var(--text-2); }
+
+    /* ── LAYOUT ── */
+    .layout { display: flex; gap: 20px; max-width: 1380px; margin: 0 auto; padding: 24px 20px 60px; align-items: flex-start; }
+    .sidebar { width: 220px; flex-shrink: 0; position: sticky; top: 72px; display: flex; flex-direction: column; gap: 12px; }
+    .content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── AGENT CARD ── */
+    .agent-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 16px; text-align: center; }
+    .avatar { width: 90px; height: 90px; border-radius: 50%; overflow: hidden; margin: 0 auto 12px; background: var(--accent-light); border: 3px solid #a5f3fc; display: flex; align-items: center; justify-content: center; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
+    .agent-label { font-size: 9px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+    .agent-name { font-size: 18px; font-weight: 700; margin-bottom: 3px; }
+    .agent-title { font-size: 11px; color: var(--text-2); line-height: 1.5; margin-bottom: 10px; }
+    .agent-tags { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+    .agent-tag { font-size: 10px; font-weight: 500; background: var(--bg); border: 1px solid var(--border); color: var(--text-2); padding: 2px 8px; border-radius: 20px; }
+
+    /* ── FORM CARD ── */
+    .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .form-card-header { background: var(--accent); padding: 12px 18px; display: flex; align-items: center; gap: 10px; }
+    .form-card-title { font-size: 12px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+    .form-card-logo { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.8); }
+
+    /* Search bar */
+    .search-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: #f9fafb; }
+    .search-input { flex: 1; border: 1px solid var(--border); border-radius: 7px; padding: 8px 12px; font-family: inherit; font-size: 13px; color: var(--text); background: #fff; outline: none; transition: border-color 0.15s; text-transform: uppercase; letter-spacing: 0.5px; }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px #cffafe; }
+    .search-input::placeholder { text-transform: none; letter-spacing: 0; color: var(--text-3); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; border: none; border-radius: 7px; padding: 8px 14px; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 0.15s, opacity 0.15s; white-space: nowrap; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-search { background: var(--accent); color: #fff; }
+    .btn-search:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-clear  { background: #f3f4f6; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-clear:hover:not(:disabled) { background: #e5e7eb; }
+    .btn-save   { background: #0891b2; color: #fff; }
+    .btn-save:hover:not(:disabled) { background: #0e7490; }
+    .btn-refresh { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .btn-refresh:hover:not(:disabled) { background: #dcfce7; }
+
+    /* Fields grid */
+    .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .field { display: flex; border-bottom: 1px solid var(--border); min-height: 42px; }
+    .field:nth-child(odd) { border-right: 1px solid var(--border); }
+    .field.full { grid-column: 1 / -1; border-right: none; }
+    .field-label { min-width: 130px; padding: 0 12px; display: flex; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-3); background: #fafafa; border-right: 1px solid var(--border); flex-shrink: 0; }
+    .field-input { flex: 1; display: flex; align-items: center; padding: 0 10px; }
+    .field-input input, .field-input select { width: 100%; border: none; background: transparent; font-family: inherit; font-size: 13px; color: var(--text); outline: none; padding: 8px 0; }
+    .field-input select { cursor: pointer; }
+    .field-input input:focus, .field-input select:focus { background: #f0fdff; border-radius: 4px; padding: 8px 6px; margin: 0 -6px; }
+
+    /* Form footer */
+    .form-footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); background: #fafafa; }
+    .save-msg { font-size: 12px; flex: 1; }
+    .save-msg.ok   { color: #16a34a; }
+    .save-msg.err  { color: #dc2626; }
+
+    /* ── DATABASE CARD ── */
+    .db-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .db-header { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .db-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-2); }
+    .db-count { font-size: 11px; color: var(--text-3); }
+    .db-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .db-table { width: 100%; border-collapse: collapse; font-size: 12px; white-space: nowrap; }
+    .db-table th { position: sticky; top: 0; background: #f0fdff; border-bottom: 2px solid #a5f3fc; padding: 8px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); }
+    .db-table td { padding: 7px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+    .db-table tr:hover td { background: #f0fdff; }
+    .db-table tr:last-child td { border-bottom: none; }
+    .db-empty { text-align: center; padding: 32px; font-size: 12px; color: var(--text-3); }
+    .db-loading { text-align: center; padding: 24px; font-size: 12px; color: var(--text-3); }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; font-size: 13px; font-weight: 500; padding: 10px 16px; border-radius: 8px; opacity: 0; transform: translateY(8px); transition: all 0.22s; pointer-events: none; z-index: 200; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ≤640px ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 14px; }
+      .nav-hamburger { display: flex; align-items: center; }
+      .nav-links { display: none; position: absolute; top: 56px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); flex-direction: column; padding: 6px 0 10px; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+      .nav-links.open { display: flex; }
+      .nav-link { padding: 10px 20px; border-radius: 0; font-size: 13px; }
+
+      .layout { flex-direction: column; padding: 12px 12px 50px; gap: 14px; }
+      .sidebar { width: 100%; position: static; flex-direction: row; flex-wrap: wrap; gap: 10px; }
+      .agent-card { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px 14px; }
+      .avatar { width: 56px; height: 56px; margin: 0; flex-shrink: 0; }
+      .agent-tags { justify-content: flex-start; }
+
+      /* Form: single column on phone */
+      .fields-grid { grid-template-columns: 1fr; }
+      .field { border-right: none !important; }
+      .field.full { border-right: none; }
+      .field { flex-direction: column; min-height: unset; }
+      .field-label { min-width: unset; width: 100%; border-right: none; border-bottom: 1px solid var(--border); padding: 6px 12px; }
+      .field-input { padding: 2px 12px 6px; }
+      .field-input input, .field-input select { font-size: 16px; padding: 8px 0; }
+
+      .search-bar { flex-wrap: wrap; }
+      .search-input { width: 100%; font-size: 16px; }
+      .btn { min-height: 44px; flex: 1; justify-content: center; }
+
+      .form-footer { flex-wrap: wrap; gap: 8px; }
+      .form-footer .btn { flex: 1; min-height: 44px; font-size: 13px; }
+
+      /* DB table: scrollable, smaller font */
+      .db-table { font-size: 11px; }
+      .db-table th, .db-table td { padding: 6px 8px; }
+
+      .toast { right: 12px; bottom: 12px; left: 12px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">305 <span>Workspace</span></div>
+  <button class="nav-hamburger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+  <div class="nav-links" id="nav-links">
+    <a class="nav-link" href="https://workspace305team.onrender.com/">&#8592; Home</a>
+    <a class="nav-link" href="https://workspace305team.onrender.com/design.html">Design</a>
+    <a class="nav-link" href="https://workspace305team.onrender.com/production.html">Production</a>
+    <a class="nav-link active" href="/">Samples Tracking</a>
+    <a class="nav-link" href="https://workspace305team.onrender.com/warehouse.html">Warehouse Now</a>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="agent-card">
+      <div class="avatar"><img src="PAUL.png" alt="Paul" onerror="this.style.display='none'" /></div>
+      <div>
+        <div class="agent-label">AI Agent</div>
+        <div class="agent-name">Paul</div>
+        <div class="agent-title">Sample Tracking Specialist<br>Approvals &amp; Logistics</div>
+        <div class="agent-tags">
+          <span class="agent-tag">Samples</span>
+          <span class="agent-tag">Approvals</span>
+          <span class="agent-tag">Logistics</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+      <div class="form-card-header">
+        <div class="form-card-logo">FARM RIO &nbsp;/&nbsp; ANTHROPOLOGIE</div>
+        <div class="form-card-title">Sample Shipping</div>
+      </div>
+
+      <!-- Search bar -->
+      <div class="search-bar">
+        <input class="search-input" id="f-search" type="text" placeholder="Search by Tracking #..." />
+        <button class="btn btn-search" onclick="searchTracking()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
+        <button class="btn btn-clear" onclick="clearForm()">Clear</button>
+      </div>
+
+      <!-- Fields -->
+      <div class="fields-grid">
+
+        <div class="field">
+          <div class="field-label">Style</div>
+          <div class="field-input"><input id="f-style" type="text" data-col="STYLE" placeholder="Style #" /></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Category</div>
+          <div class="field-input">
+            <select id="f-category" data-col="CATEGORY">
+              <option value="">--</option>
+              <option>ACCESSORIES</option><option>BLOUSE</option><option>BOTTOM</option>
+              <option>DRESS</option><option>SKIRT</option><option>SWEATER</option>
+              <option>SWIM</option><option>LOUNGE</option><option>COVER UP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Attn / Buyer</div>
+          <div class="field-input">
+            <select id="f-attn" data-col="ATTN / BUYER">
+              <option value="">--</option>
+              <option>JULIE/DRESSES</option>
+              <option>IVY/SWIM</option>
+              <option>ALY/BLOUSES</option>
+              <option>CAROLINE/BOTTOM</option>
+              <option>ABBY/SKIRTS</option>
+              <option>Jacqueline Mazzi/ KNITS</option>
+              <option>MC Miskuly/Maternity/Nuuly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Sample Type</div>
+          <div class="field-input">
+            <select id="f-sample-type" data-col="SAMPLE TYPE">
+              <option value="">--</option>
+              <option>PROTO SAMPLE</option>
+              <option>SMS SAMPLE</option>
+              <option>1ST FIT SAMPLE</option>
+              <option>2ND FIT SAMPLE</option>
+              <option>3RD FIT SAMPLE</option>
+              <option>PHOTO SAMPLE</option>
+              <option>TOP SAMPLE</option>
+              <option>PHOTO &amp; TOP SAMPLE</option>
+              <option>STRIKE OFF/ MOCK UP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Supplier</div>
+          <div class="field-input">
+            <select id="f-supplier" data-col="SUPPLIER">
+              <option value="">--</option>
+              <option>CASCADE</option><option>ECICO</option><option>GAIA</option>
+              <option>H&amp;F</option><option>KONCEPTION</option><option>PQSWIM</option>
+              <option>S&amp;S</option><option>HS FASHION</option><option>JJ</option>
+              <option>Topshow Headwear</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Tracking #</div>
+          <div class="field-input"><input id="f-tracking" type="text" data-col="TRACKING" placeholder="Tracking number" /></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">Ship Date</div>
+          <div class="field-input"><input id="f-ship-date" type="date" data-col="SHIP DATE" /></div>
+        </div>
+
+        <div class="field">
+          <div class="field-label">ETA</div>
+          <div class="field-input"><input id="f-eta" type="date" data-col="ETA" /></div>
+        </div>
+
+        <div class="field full">
+          <div class="field-label">Disclaimer</div>
+          <div class="field-input"><input id="f-disclaimer" type="text" data-col="DISCLAIMER" placeholder="Optional note..." /></div>
+        </div>
+
+        <div class="field full">
+          <div class="field-label">Created By</div>
+          <div class="field-input"><input id="f-created-by" type="text" data-col="CREATED BY" placeholder="Your name" /></div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="form-footer">
+        <span class="save-msg" id="save-msg"></span>
+        <button class="btn btn-save" id="btn-save" onclick="saveSample()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save
+        </button>
+      </div>
+    </div>
+
+    <!-- DATABASE CARD -->
+    <div class="db-card">
+      <div class="db-header">
+        <div>
+          <div class="db-title">Sample Database New</div>
+          <div class="db-count" id="db-count"></div>
+        </div>
+        <button class="btn btn-refresh" id="btn-refresh" onclick="loadDatabase()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Refresh
+        </button>
+      </div>
+      <div class="db-wrap">
+        <div class="db-loading" id="db-loading">Loading…</div>
+        <table class="db-table" id="db-table" style="display:none;">
+          <thead id="db-head"></thead>
+          <tbody id="db-body"></tbody>
+        </table>
+        <div class="db-empty" id="db-empty" style="display:none;">No records found.</div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /layout -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+function toggleNav() { document.getElementById('nav-links').classList.toggle('open'); }
+
+// ── Helpers ──────────────────────────────────────────────────────────────
+function showToast(msg, duration = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function setMsg(msg, type = '') {
+  const el = document.getElementById('save-msg');
+  el.textContent = msg;
+  el.className = 'save-msg' + (type ? ' ' + type : '');
+}
+
+function getVal(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function setVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val || '';
+}
+
+// Collect all form fields as an object keyed by data-col
+function collectForm() {
+  const obj = {};
+  document.querySelectorAll('[data-col]').forEach(el => {
+    obj[el.dataset.col] = el.value.trim();
+  });
+  return obj;
+}
+
+// Fill form from a sample object (keys = column headers)
+function fillForm(sample) {
+  const map = {
+    'STYLE':         'f-style',
+    'CATEGORY':      'f-category',
+    'ATTN / BUYER':  'f-attn',
+    'SAMPLE TYPE':   'f-sample-type',
+    'SUPPLIER':      'f-supplier',
+    'TRACKING':      'f-tracking',
+    'SHIP DATE':     'f-ship-date',
+    'ETA':           'f-eta',
+    'DISCLAIMER':    'f-disclaimer',
+    'CREATED BY':    'f-created-by',
+  };
+  Object.entries(map).forEach(([col, id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let val = sample[col] || '';
+    // Convert MM/DD/YYYY dates to YYYY-MM-DD for date inputs
+    if (el.type === 'date' && /^\d{1,2}\/\d{1,2}\/\d{4}$/.test(val)) {
+      const [m, d, y] = val.split('/');
+      val = `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+    }
+    el.value = val;
+  });
+}
+
+function clearForm() {
+  document.getElementById('f-search').value = '';
+  document.querySelectorAll('[data-col]').forEach(el => { el.value = ''; });
+  setMsg('');
+}
+
+// ── Search ───────────────────────────────────────────────────────────────
+async function searchTracking() {
+  const tracking = document.getElementById('f-search').value.trim();
+  if (!tracking) { showToast('Enter a tracking number to search'); return; }
+  setMsg('Searching…');
+  try {
+    const res  = await fetch(`/api/search?tracking=${encodeURIComponent(tracking)}`);
+    const data = await res.json();
+    if (!res.ok) { setMsg(data.error || 'Not found', 'err'); return; }
+    fillForm(data.sample);
+    setMsg('Record loaded — edit and save to update', 'ok');
+  } catch (e) {
+    setMsg('Search failed: ' + e.message, 'err');
+  }
+}
+
+// ── Save ─────────────────────────────────────────────────────────────────
+async function saveSample() {
+  const body = collectForm();
+  if (!body['TRACKING']) { setMsg('Tracking # is required', 'err'); return; }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  setMsg('Saving…');
+
+  // Convert date inputs (YYYY-MM-DD) to MM/DD/YYYY for the sheet
+  ['SHIP DATE', 'ETA'].forEach(k => {
+    if (body[k] && /^\d{4}-\d{2}-\d{2}$/.test(body[k])) {
+      const [y, m, d] = body[k].split('-');
+      body[k] = `${m}/${d}/${y}`;
+    }
+  });
+
+  try {
+    const res  = await fetch('/api/save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Save failed');
+    const action = data.action === 'updated' ? 'updated' : 'created';
+    setMsg(`Record ${action} successfully`, 'ok');
+    showToast(`Saved — record ${action}`);
+    loadDatabase(); // refresh table
+  } catch (e) {
+    setMsg(e.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Database view ─────────────────────────────────────────────────────────
+async function loadDatabase() {
+  const loadEl  = document.getElementById('db-loading');
+  const tableEl = document.getElementById('db-table');
+  const emptyEl = document.getElementById('db-empty');
+  const countEl = document.getElementById('db-count');
+  const btn     = document.getElementById('btn-refresh');
+
+  loadEl.style.display  = 'block';
+  tableEl.style.display = 'none';
+  emptyEl.style.display = 'none';
+  btn.disabled = true;
+
+  try {
+    const res  = await fetch('/api/database');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+
+    const { headers, data: rows } = data;
+    countEl.textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
+
+    if (rows.length === 0) {
+      loadEl.style.display  = 'none';
+      emptyEl.style.display = 'block';
+      return;
+    }
+
+    document.getElementById('db-head').innerHTML =
+      '<tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr>';
+
+    document.getElementById('db-body').innerHTML = rows.map(row =>
+      '<tr>' + headers.map(h => `<td>${row[h] || ''}</td>`).join('') + '</tr>'
+    ).join('');
+
+    loadEl.style.display  = 'none';
+    tableEl.style.display = 'table';
+  } catch (e) {
+    loadEl.textContent = 'Failed to load: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Search on Enter key
+document.getElementById('f-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') searchTracking();
+});
+
+// Load database on page load
+loadDatabase();
+</script>
+</body>
+</html>
